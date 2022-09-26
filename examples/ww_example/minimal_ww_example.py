@@ -86,27 +86,3 @@ my_tally_mesh.write_data_to_vtk(
     filename="my_tally_ww.vtk",
     datasets={"mean": my_tally.mean, "std_dev": my_tally.std_dev}
 )
-
-my_tally_ww = results_ww.get_tally(name='flux_on_mesh')
-my_slice_ww = my_tally_ww.get_slice(scores=['flux'])
-my_slice_ww.mean.shape = (my_tally_mesh.dimension[0], my_tally_mesh.dimension[2])
-fig = plt.subplot()
-
-# when plotting the 2d data, added the extent is required.
-# otherwise the plot uses the index of the 2d data arrays
-# as the x y axis
-
-from matplotlib.colors import LogNorm
-fig.imshow(
-    my_slice_ww.mean,
-    extent=[-5_000, 5_000, -5_000, 5_000] ,
-    norm=LogNorm() # vmin=0.01, vmax=1
-)
-plt.savefig('ww_mean.png')
-
-fig.imshow(
-    my_slice_ww.std_dev,
-    extent=[-5_000, 5_000, -5_000, 5_000] ,
-    norm=LogNorm() # vmin=0.01, vmax=1
-)
-plt.savefig('ww_std_dev.png')
