@@ -29,10 +29,12 @@ model = openmc.model.Model(geometry, materials, settings, tallies)
 model.generate_wws_magic_method(tally=flux_mesh_tally, iterations=5, rel_err_tol=0.7)
 ```
 
-See [examples](https://github.com/fusion-energy/openmc_weight_window_generator/tree/master/examples) folder for usage
+# Example usage
 
-The fusion-energy/neutronics-workshop also has [a task](https://github.com/fusion-energy/neutronics-workshop/tree/main/tasks/task_13_variance_reduction) that makes use of this package
+* See [examples](https://github.com/fusion-energy/openmc_weight_window_generator/tree/master/examples) folder for usage
 
-Acknowledgments
+* The fusion-energy/neutronics-workshop also has [a task](https://github.com/fusion-energy/neutronics-workshop/tree/main/tasks/task_13_variance_reduction) that makes use of this package
+
+# Acknowledgments
 
 Many thanks to @pshriwise @eepeterson and @YuanHu-PKU-KIT for their work on OpenMC weight Windows without which this package would not be possible.
