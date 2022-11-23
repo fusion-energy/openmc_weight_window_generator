@@ -13,4 +13,5 @@ except PackageNotFoundError:
 
 __all__ = ["__version__"]
 
-from .core import magic
+from .core import StatePoint
+from .core import Model
