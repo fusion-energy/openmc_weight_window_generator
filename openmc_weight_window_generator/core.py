@@ -13,7 +13,7 @@ _ALLOWED_FILTER_TYPES = (openmc.MeshFilter, openmc.EnergyFilter, openmc.Particle
 
 class StatePoint(openmc.StatePoint):
 
-    def generate_wws(self, tally, rel_err_tol=0.7):
+    def generate_wws(self, tally, rel_err_tol=0.7, max_split=1_000_000):
         """
         Generates weight windows based on a tally.
 
@@ -105,7 +105,7 @@ class StatePoint(openmc.StatePoint):
                 upper_bound_ratio=5.0,
                 energy_bounds=e_bounds,
                 particle_type=particle,
-                max_split=1_000_000
+                max_split=max_split
             )
 
             wws.append(p_weight_windows)
@@ -114,10 +114,9 @@ class StatePoint(openmc.StatePoint):
 
 
 
-
 class Model(openmc.Model):
 
-    def generate_wws_magic_method(self, tally, iterations, rel_err_tol=0.7):
+    def generate_wws_magic_method(self, tally, iterations, rel_err_tol=0.7, max_split=1_000_000):
         """
         Performs weight window generation using the MAGIC method
 
@@ -150,7 +149,7 @@ class Model(openmc.Model):
             if comm.rank == 0:
 
                 with openmc.StatePoint(sp_file) as sp:
-                    wws = sp.generate_wws(tally, rel_err_tol)
+                    wws = sp.generate_wws(tally=tally, rel_err_tol=rel_err_tol, max_split=1_000_000)
                 self.settings.weight_windows = wws
                 self.export_to_xml()
 
