@@ -13,7 +13,7 @@ _ALLOWED_FILTER_TYPES = (openmc.MeshFilter, openmc.EnergyFilter, openmc.Particle
 
 class StatePoint(openmc.StatePoint):
 
-    def generate_wws(self, tally, rel_err_tol=0.7):
+    def generate_wws(self, tally, rel_err_tol=0.7, max_split=1_000_000):
         """
         Generates weight windows based on a tally.
 
@@ -105,7 +105,7 @@ class StatePoint(openmc.StatePoint):
                 upper_bound_ratio=5.0,
                 energy_bounds=e_bounds,
                 particle_type=particle,
-                max_split=1_000_000
+                max_split=max_split
             )
 
             wws.append(p_weight_windows)
@@ -114,10 +114,9 @@ class StatePoint(openmc.StatePoint):
 
 
 
-openmc.StatePoint = StatePoint
 class Model(openmc.Model):
 
-    def generate_wws_magic_method(self, tally_id, iterations, rel_err_tol=0.7):
+    def generate_wws_magic_method(self, tally, iterations, rel_err_tol=0.7, max_split=1_000_000):
         """
         Performs weight window generation using the MAGIC method
 
@@ -129,8 +128,8 @@ class Model(openmc.Model):
         Parameters
         ----------
 
-        tally : int
-            The tally ID to use for weight window generation
+        tally : openmc.Tally
+            The tally use for weight window generation
         iterations : int
             The number of iterations to perform
         rel_err_tol : float (default: 0.7)
@@ -141,18 +140,20 @@ class Model(openmc.Model):
         # check_tally(model, tally_id)
 
         if comm.rank == 0:
-            model.export_to_xml()
+            self.export_to_xml()
         comm.barrier()
 
-        sum_of_std_dev = []
         for _ in range(iterations):
             openmc.run()
             sp_file = f'statepoint.{self.settings.batches}.h5'
             if comm.rank == 0:
-                wws = generate_wws(sp_file, tally_id, rel_err_tol)
-                model.settings.weight_windows = wws
-                model.export_to_xml()
-                # plot_flux_with_ww(wws, model, sp_file, tally_id, filename=f'flux_std_dev_{_}.png')
+
+                with openmc.StatePoint(sp_file) as sp:
+                    wws = sp.generate_wws(tally=tally, rel_err_tol=rel_err_tol, max_split=1_000_000)
+                self.settings.weight_windows = wws
+                self.export_to_xml()
 
 
+# monkey patch openmc to provide functionality on the openmc objects
+openmc.StatePoint = StatePoint
 openmc.Model = Model

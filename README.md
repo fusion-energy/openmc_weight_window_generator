@@ -1,6 +1,8 @@
 Generate weight windows for use in OpenMC simulation with varience reduction
 
-Based on a [script](https://github.com/pshriwise/openmc/tree/ww_gen) by @pshriwise
+Based on a [script](https://github.com/pshriwise/openmc/tree/ww_gen) by @pshriwise.
+
+Please note that the weight window implementation in OpenMC is rapidly improving and the MAGIC method and other weight window generation techniques will become available in OpenMC directly without bolt on packages like this.
 
 ```bash
 pip install git+https://github.com/fusion-energy/openmc_weight_window_generator.git
@@ -29,3 +31,8 @@ model.generate_wws_magic_method(tally=flux_mesh_tally, iterations=5, rel_err_tol
 
 See [examples](https://github.com/fusion-energy/openmc_weight_window_generator/tree/master/examples) folder for usage
 
+The fusion-energy/neutronics-workshop also has [a task](https://github.com/fusion-energy/neutronics-workshop/tree/main/tasks/task_13_variance_reduction) that makes use of this package
+
+Acknowledgments
+
+Many thanks to @pshriwise @eepeterson and @YuanHu-PKU-KIT for their work on OpenMC weight Windows without which this package would not be possible.
