@@ -3,7 +3,7 @@ Generate weight windows for use in OpenMC simulation with varience reduction
 Based on a [script](https://github.com/pshriwise/openmc/tree/ww_gen) by @pshriwise
 
 ```bash
-pip install .
+pip install git+https://github.com/fusion-energy/openmc_weight_window_generator.git
 ```
 
 Generate weight windows from an OpenMC statepoint file. Note the statepoint file must contain a flux mesh tally.
