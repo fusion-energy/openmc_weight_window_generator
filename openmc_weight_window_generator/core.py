@@ -6,7 +6,7 @@ import numpy as np
 import openmc
 import openmc.lib
 from openmc.mpi import comm
-
+from pathlib import Path
 
 _ALLOWED_FILTER_TYPES = (openmc.MeshFilter, openmc.EnergyFilter, openmc.ParticleFilter)
 
@@ -139,19 +139,32 @@ class Model(openmc.Model):
 
         # check_tally(model, tally_id)
 
-        if comm.rank == 0:
-            self.export_to_xml()
-        comm.barrier()
+        cwd_stub = Path('weight_window_outputs')
 
-        for _ in range(iterations):
-            openmc.run()
-            sp_file = f'statepoint.{self.settings.batches}.h5'
-            if comm.rank == 0:
+        # if comm.rank == 0:
+            # print('comm rank is 0 so exporting xml')
+        # comm.barrier()
 
-                with openmc.StatePoint(sp_file) as sp:
-                    wws = sp.generate_wws(tally=tally, rel_err_tol=rel_err_tol, max_split=1_000_000)
-                self.settings.weight_windows = wws
-                self.export_to_xml()
+        for i in range(1, iterations+1):  # starting at 1 stopping at iterations +1
+            
+            # for the first iteration the settings might not contain ww
+            self.export_to_xml(directory=cwd_stub/ f'{i}')
+
+            #runs with xml found in dir
+            openmc.run(cwd=cwd_stub / f'{i}')
+            sp_file = Path(cwd_stub) / f'{i}' / f'statepoint.{self.settings.batches}.h5'
+            
+            # if comm.rank == 0:
+            #     print('comm rank is 0 so making ww from statepoint and exporting xml')
+
+            with openmc.StatePoint(sp_file) as sp:
+                wws = sp.generate_wws(tally=tally, rel_err_tol=rel_err_tol, max_split=1_000_000)
+            self.settings.weight_windows = wws
+            # print(f'exporting xml to next director {i+1}')
+            # self.export_to_xml(directory=cwd_stub / ')
+
+
+
 
 
 # monkey patch openmc to provide functionality on the openmc objects
