@@ -113,10 +113,16 @@ class StatePoint(openmc.StatePoint):
         return wws
 
 
-
 class Model(openmc.Model):
 
-    def generate_wws_magic_method(self, tally, iterations, rel_err_tol=0.7, max_split=1_000_000):
+    def generate_wws_magic_method(
+        self,
+        tally: openmc.Tally,
+        iterations: int,
+        rel_err_tol: float = 0.7,
+        max_split: int = 1_000_000,
+        output_dir: str = 'weight_window_outputs'
+    ):
         """
         Performs weight window generation using the MAGIC method
 
@@ -139,32 +145,33 @@ class Model(openmc.Model):
 
         # check_tally(model, tally_id)
 
-        cwd_stub = Path('weight_window_outputs')
+        cwd_stub = Path(output_dir)
 
         # if comm.rank == 0:
             # print('comm rank is 0 so exporting xml')
         # comm.barrier()
 
         for i in range(1, iterations+1):  # starting at 1 stopping at iterations +1
-            
+            print(f'iteration {i} of {iterations}')
             # for the first iteration the settings might not contain ww
             self.export_to_xml(directory=cwd_stub/ f'{i}')
 
-            #runs with xml found in dir
+            # runs with xml found in dir
             openmc.run(cwd=cwd_stub / f'{i}')
             sp_file = Path(cwd_stub) / f'{i}' / f'statepoint.{self.settings.batches}.h5'
-            
+
             # if comm.rank == 0:
             #     print('comm rank is 0 so making ww from statepoint and exporting xml')
 
             with openmc.StatePoint(sp_file) as sp:
-                wws = sp.generate_wws(tally=tally, rel_err_tol=rel_err_tol, max_split=1_000_000)
+                wws = sp.generate_wws(
+                    tally=tally,
+                    rel_err_tol=rel_err_tol,
+                    max_split=1_000_000,
+                )
             self.settings.weight_windows = wws
             # print(f'exporting xml to next director {i+1}')
             # self.export_to_xml(directory=cwd_stub / ')
-
-
-
 
 
 # monkey patch openmc to provide functionality on the openmc objects
