@@ -6,14 +6,14 @@ import numpy as np
 import openmc
 import openmc.lib
 from openmc.mpi import comm
-
+from pathlib import Path
 
 _ALLOWED_FILTER_TYPES = (openmc.MeshFilter, openmc.EnergyFilter, openmc.ParticleFilter)
 
 
 class StatePoint(openmc.StatePoint):
 
-    def generate_wws(self, tally, rel_err_tol=0.7, max_split=1_000_000):
+    def generate_wws(self, tally, rel_err_tol=0.95, max_split=1_000_000):
         """
         Generates weight windows based on a tally.
 
@@ -113,10 +113,16 @@ class StatePoint(openmc.StatePoint):
         return wws
 
 
-
 class Model(openmc.Model):
 
-    def generate_wws_magic_method(self, tally, iterations, rel_err_tol=0.7, max_split=1_000_000):
+    def generate_wws_magic_method(
+        self,
+        tally: openmc.Tally,
+        iterations: int,
+        rel_err_tol: float = 0.95,
+        max_split: int = 1_000_000,
+        output_dir: str = 'weight_window_outputs'
+    ):
         """
         Performs weight window generation using the MAGIC method
 
@@ -132,26 +138,42 @@ class Model(openmc.Model):
             The tally use for weight window generation
         iterations : int
             The number of iterations to perform
-        rel_err_tol : float (default: 0.7)
+        rel_err_tol : float (default: 0.95)
             Upper limit on relative error of flux values used to produce
             weight windows.
         """
 
         # check_tally(model, tally_id)
 
-        if comm.rank == 0:
-            self.export_to_xml()
-        comm.barrier()
+        cwd_stub = Path(output_dir)
 
-        for _ in range(iterations):
-            openmc.run()
-            sp_file = f'statepoint.{self.settings.batches}.h5'
-            if comm.rank == 0:
+        # if comm.rank == 0:
+            # print('comm rank is 0 so exporting xml')
+        # comm.barrier()
+        all_wws = []
+        for i in range(1, iterations+1):  # starting at 1 stopping at iterations +1
+            print(f'iteration {i} of {iterations}')
+            # for the first iteration the settings might not contain ww
+            self.export_to_xml(directory=cwd_stub/ f'{i}')
 
-                with openmc.StatePoint(sp_file) as sp:
-                    wws = sp.generate_wws(tally=tally, rel_err_tol=rel_err_tol, max_split=1_000_000)
-                self.settings.weight_windows = wws
-                self.export_to_xml()
+            # runs with xml found in dir
+            openmc.run(cwd=cwd_stub / f'{i}')
+            sp_file = Path(cwd_stub) / f'{i}' / f'statepoint.{self.settings.batches}.h5'
+
+            # if comm.rank == 0:
+            #     print('comm rank is 0 so making ww from statepoint and exporting xml')
+
+            with openmc.StatePoint(sp_file) as sp:
+                wws = sp.generate_wws(
+                    tally=tally,
+                    rel_err_tol=rel_err_tol,
+                    max_split=max_split,
+                )
+            self.settings.weight_windows = wws
+            all_wws.append(wws)
+            # print(f'exporting xml to next director {i+1}')
+            # self.export_to_xml(directory=cwd_stub / ')
+        return all_wws
 
 
 # monkey patch openmc to provide functionality on the openmc objects
