@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from pathlib import Path
 
 from copy import deepcopy
 
@@ -146,6 +147,11 @@ class Model(openmc.Model):
         # check_tally(model, tally_id)
 
         cwd_stub = Path(output_dir)
+
+        # expand dagmc paths if needed
+        for univ in self.geometry.get_all_universes().values():
+            if isinstance(univ, openmc.DAGMCUniverse):
+                univ.filename = Path(univ.filename).absolute()
 
         # if comm.rank == 0:
             # print('comm rank is 0 so exporting xml')
