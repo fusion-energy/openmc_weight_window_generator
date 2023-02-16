@@ -4,9 +4,14 @@ Based on a [script](https://github.com/pshriwise/openmc/tree/ww_gen) by @pshriwi
 
 Please note that the weight window implementation in OpenMC is rapidly improving and the MAGIC method and other weight window generation techniques will become available in OpenMC directly without bolt on packages like this.
 
+Once [this pull request](https://github.com/openmc-dev/openmc/pull/2359) is merged it will add weight window generation directly to OpenMC and the subsequent release of OpenMC package will no longer be needed
+
+# Install
+
 ```bash
 pip install git+https://github.com/fusion-energy/openmc_weight_window_generator.git
 ```
+# Usage
 
 Generate weight windows from an OpenMC statepoint file. Note the statepoint file must contain a flux mesh tally.
 ```python
@@ -29,7 +34,7 @@ model = openmc.model.Model(geometry, materials, settings, tallies)
 model.generate_wws_magic_method(tally=flux_mesh_tally, iterations=5, rel_err_tol=0.7)
 ```
 
-# Example usage
+# Examples
 
 * See [examples](https://github.com/fusion-energy/openmc_weight_window_generator/tree/master/examples) folder for usage
 
