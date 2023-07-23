@@ -1,3 +1,6 @@
+# This package is depreciated, make use of inbuilt openmc.WeightWindowGenerator or openmc.lib.WeightWindows methods in OpenMC
+
+
 Generate weight windows for use in OpenMC simulation with varience reduction
 
 Based on a [script](https://github.com/pshriwise/openmc/tree/ww_gen) by @pshriwise.
