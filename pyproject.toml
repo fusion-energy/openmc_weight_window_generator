@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = openmc_weight_window_generator"
+name = "openmc_weight_window_generator"
 authors = [
   { name="Jonathan Shimwell", email="mail@jshimwell.com" },
 ]
