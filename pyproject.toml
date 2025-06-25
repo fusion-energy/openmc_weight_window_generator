@@ -1,10 +1,43 @@
 [build-system]
 requires = [
-    "setuptools >= 46.4.0",
-    "wheel",
-    "setuptools_scm[toml] >= 6.3.1",
+    "setuptools >= 65.5.0",
+    "setuptools_scm[toml] >= 7.0.5",
 ]
 build-backend = "setuptools.build_meta"
 
+
+[project]
+name = openmc_weight_window_generator"
+authors = [
+  { name="Jonathan Shimwell", email="mail@jshimwell.com" },
+]
+license = {file = "LICENSE"}
+description = "A Python package that simplifies the production of Weight Windows in OpenMC"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["openmc", "weight", "window"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy>=1.21.1",
+]
+dynamic = ["version"]
+
 [tool.setuptools_scm]
-write_to = "openmc_weight_window_generator/_version.py"
+write_to = "src/_version.py"
+
+[project.optional-dependencies]
+tests = [
+    "pytest",
+    "requests"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/fusion-energyopenmc_weight_window_generator"
+"Bug Tracker" = "https://github.com/fusion-energyopenmc_weight_window_generator/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
