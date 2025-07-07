@@ -1,13 +1,7 @@
 import openmc
-
-
-
 from typing import Tuple
 
 
-# TODO this has no measure of how effective the various settings are, user can
-# easily set the number of particles and batches to be too low or too high
-# ideally these settings would be automated for the user
 def generate_ww(
     model: openmc.Model,
     random_ray_particles: int = 800,
@@ -143,7 +137,6 @@ my_source.energy = openmc.stats.Discrete([14e6], [1])
 my_settings.source = my_source
 
 model = openmc.model.Model(my_geometry, my_materials, my_settings)
-
 
 weight_window = generate_ww(model=model)
 
