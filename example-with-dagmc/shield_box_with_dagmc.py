@@ -1,5 +1,11 @@
 import openmc
 from typing import Tuple
+from pathlib import Path
+
+# Setting the cross section path to the correct location in the docker image.
+# If you are running this outside the docker image you will have to change this path to your local cross section path.
+openmc.config["cross_sections"] = Path.home() / "nuclear_data" / "cross_sections.xml"
+
 
 
 def generate_ww(
@@ -58,22 +64,7 @@ def generate_ww(
 
     rr_model.convert_to_random_ray()
 
-    mesh = openmc.RegularMesh().from_domain(rr_model)
-    if isinstance(mesh_dimension, int):
-        import openmc.checkvalue as cv
-
-        cv.check_greater_than("mesh_dimension", mesh_dimension, 1, equality=True)
-        # If a single integer is provided, divide the domain into that many
-        # mesh cells with roughly equal lengths in each direction
-        ideal_cube_volume = model.bounding_box.volume / mesh_dimension
-        ideal_cube_size = ideal_cube_volume ** (1 / 3)
-        mesh_dimension = tuple(
-            max(1, int(round(side / ideal_cube_size)))
-            for side in model.bounding_box.width
-        )
-
-    mesh.dimension = mesh_dimension
-    mesh.id = 1
+    mesh = openmc.RegularMesh().from_domain(rr_model, dimension=mesh_dimension)
 
     # avoid writing files we don't make use of
     rr_model.settings.output = {"summary": False, "tallies": False}
