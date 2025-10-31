@@ -185,8 +185,8 @@ plot = model.plot(
     basis="yz", color_by="material", n_samples=10000, outline=True, plane_tolerance=150
 )
 plot.figure.savefig("geometry_yz.png", bbox_inches="tight")
-
-
+plt.close()
+plt.clf()
 
 
 
@@ -199,7 +199,6 @@ def generate_ww(
     random_ray_particles: int = 800,
     random_ray_batches: int = 100,
     random_ray_inactive: int = 50,
-    weight_window_generator_max_realizations: int = 100,
     multigroup_nparticles: int = 2000,
     mesh_dimension: Tuple[int] | int = 1000000,
     particle_type: str = "neutron",
@@ -212,8 +211,6 @@ def generate_ww(
         random_ray_particles (int): Number of particles per batch for Random Ray.
         random_ray_batches (int): Number of batches for Random Ray.
         random_ray_inactive (int): Number of inactive batches for Random Ray.
-        weight_window_generator_max_realizations (int): Maximum number of realizations for the weight window
-            generator.
         multigroup_nparticles (int): Number of particles for the multigroup cross section generation.
         mesh_dimension (Tuple[int]): Dimensions of the regular mesh used for the weight window generation.
         particle_type (str): Type of particle for the weight window (e.g., 'neutron', 'photon').
@@ -267,7 +264,6 @@ def generate_ww(
     rr_model.settings.weight_window_generators = openmc.WeightWindowGenerator(
         method="fw_cadis",
         mesh=mesh,
-        max_realizations=weight_window_generator_max_realizations,
         particle_type=particle_type,  # TODO should this particle_type be checked against the model.settings.source.particle?
         energy_bounds=[0.0, 100e6]
         # could use multiple bins here, openmc.mgxs.EnergyGroups("CASMO-2").group_edges
@@ -429,7 +425,7 @@ run_and_plot(model, "flux_results_with_ww.png")
 model.settings.weight_windows_on = False
 model.settings.batches = 12
 
-run_and_plot(model, "flux_results_with_ww.png")
+run_and_plot(model, "flux_results_without_ww.png")
 
 
 
